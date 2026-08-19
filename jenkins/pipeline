@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION     = 'eu-north-1'
+        ECR_REPO       = 'helloword'
+        AWS_ACCOUNT_ID = '278387432250'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        region = "eu-north-1"
+        cluster_name = "EksHelloWord"
+        namespace = 'helloword'
+        IMAGE          = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
+    }
+
+    stages {
+
+        stage("Build") {
+            steps {
+
+                // Clone GitHub repository
+                git branch: 'main',
+                    url: 'https://github.com/meghraj8788/deployment_simple_application.git'
+
+                // Build Docker image
+                sh """
+                    docker build -t ${ECR_REPO}:${IMAGE_TAG} ./hello_word_application
+                """
+
+                // Login to ECR
+                sh """
+                    aws ecr get-login-password --region ${AWS_REGION} |
+                    docker login --username AWS --password-stdin \
+                    ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                """
+
+                // Tag image
+                sh """
+                    docker tag ${ECR_REPO}:${IMAGE_TAG} ${IMAGE}
+                """
+
+                // Push image
+                sh """
+                    docker push ${IMAGE}
+                """
+            }
+        }
+
+        stage("Test") {
+            steps {
+                sh """
+                docker images
+                docker ps
+                """
+            }
+        }
+
+        stage("Deploy") {
+            steps {
+                //sh """
+                  //  docker stop helloword || true
+                  //  docker rm helloword || true
+
+                  //  docker run -d \
+                    //    --name helloword \
+                    //    -p 5001:5000 \
+                    //    ${IMAGE}
+               // """
+               sh """
+               kubectl update-kubeconfig --name ${cluster_name} --region ${region}
+               sed "s|IMAGE_PLACEHOLDER|${IMAGE_TAG}" k8s/deployment.yaml
+               kubectl apply -f deployment.yaml -n ${namespace}
+               kubectl rollout status deployment/helloword -n ${namespace} 
+               """
+            }
+        }
+        
+    }
+}

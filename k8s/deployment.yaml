@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloword
+  namespace: helloword
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: helloword
+  template:
+    metadata:
+      labels:
+        app: helloword
+    spec:
+      containers:
+        - name: helloword
+          image: 278387432250.dkr.ecr.eu-north-1.amazonaws.com/helloword:IMAGE_TAG_PLACEHOLDER
+          ports:
+            - containerPort: 5000
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits: { cpu: "300m", memory: "256Mi" }
+          readinessProbe:
+            httpGet: { path: /, port: 5000 }
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet: { path: /, port: 5000 }
+            initialDelaySeconds: 10
