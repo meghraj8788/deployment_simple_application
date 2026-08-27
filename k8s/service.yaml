@@ -4,9 +4,9 @@ metadata:
   name: helloword-svc
   namespace: helloword
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: helloword
   ports:
-    - port: 80
+    - port: 90
       targetPort: 5000
