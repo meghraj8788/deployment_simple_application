@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: helloword-argocd
+  namespace: argocd
+spec:
+  project:
+    helloword-project
+  source:
+    repoURL: https://github.com/meghraj8788/deployment_simple_application.git
+    targetRevision: main
+    path: k8s/
+
+  destination:
+    server: https://781CB3F7DA14B0A36A50206F830807B9.gr7.eu-north-1.eks.amazonaws.com
+    namespace: helloword
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+    syncOptions:
+      - CreateNamespace=true
