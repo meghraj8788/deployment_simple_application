@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: helloword
-          image: 278387432250.dkr.ecr.eu-north-1.amazonaws.com/helloword:IMAGE_TAG_PLACEHOLDER
+          image: 278387432250.dkr.ecr.eu-north-1.amazonaws.com/helloword:21
           ports:
             - containerPort: 5000
           resources:
