@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: helloword-project
+  namespace: argocd
+spec:
+  description: HelloWorld application project
+
+  sourceRepos:
+    - https://github.com/meghraj8788/deployment_simple_application.git
+
+  destinations:
+    - namespace: helloword
+      server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

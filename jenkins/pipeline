@@ -19,6 +19,7 @@ pipeline {
 
                 // Clone GitHub repository
                 git branch: 'main',
+                    credentialsId : "github-credentials",
                     url: 'https://github.com/meghraj8788/deployment_simple_application.git'
 
                 // Build Docker image
@@ -54,8 +55,8 @@ pipeline {
             }
         }
 
-        stage("Deploy") {
-            steps {
+        //stage("Deploy") {
+          //  steps {
                 //sh """
                   //  docker stop helloword || true
                   //  docker rm helloword || true
@@ -65,14 +66,34 @@ pipeline {
                     //    -p 5001:5000 \
                     //    ${IMAGE}
                // """
-               sh """
-               aws eks update-kubeconfig --name ${cluster_name} --region ${region}
-               sed "s|IMAGE_PLACEHOLDER|${IMAGE_TAG}" k8s/deployment.yaml
-               kubectl apply -f deployment.yaml -n ${namespace}
-               kubectl rollout status deployment/helloword -n ${namespace} 
-               """
-            }
-        }
-        
+              // sh """
+              // aws eks update-kubeconfig --name ${cluster_name} --region ${region}
+              // sed -i "s|IMAGE_TAG_PLACEHOLDER|${IMAGE_TAG}|g" k8s/deployment.yaml
+              // kubectl apply -f k8s/deployment.yaml -n ${namespace}
+               //kubectl rollout status deployment/helloword -n ${namespace} 
+               //"""
+            //}
+       // }
+        //stage("update k8s file"){
+        //    steps{
+         //        withCredentials([
+          //          usernamePassword(
+           //             credentialsId: 'github-credentials',
+            //            usernameVariable: 'GIT_USERNAME',
+             //           passwordVariable: 'GIT_PASSWORD'
+             //       )
+             //   ])
+                
+              //  {sh """
+               // sed -i "s|image: .*helloword:.*|image: ${IMAGE}|" k8s/deployment.yaml
+                
+               // git config user.name "Jenkins CI"
+               // git config user.email "jenkins@vand.click" 
+               // git add k8s/deployment.yaml 
+               // git commit -m "Update helloword image to ${IMAGE_TAG}" || true 
+               // git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/meghraj8788/deployment_simple_application.git HEAD:main
+               // """}
+            //}
+        //}
     }
 }
