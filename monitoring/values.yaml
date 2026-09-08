@@ -78,3 +78,59 @@ alertmanager:
       limits:
         cpu: 250m
         memory: 256Mi
+    secrets:                    # ✅ correct — nested inside alertmanagerSpec
+      - alertmanager-smtp-secret  
+  config:
+    global:
+      resolve_timeout: 5m
+      smtp_smarthost: 'smtp.gmail.com:587'
+      smtp_from: 'meghrajbackup8788@gmail.com'           # ← your Gmail address
+      smtp_auth_username: 'meghrajbackup8788@gmail.com'  # ← same Gmail address
+      smtp_auth_password_file: '/etc/alertmanager/secrets/alertmanager-smtp-secret/smtp-password'
+      smtp_require_tls: true
+
+    route:
+      group_by: ['alertname', 'namespace', 'severity']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      receiver: 'default-email'
+
+      routes:
+        - matchers:
+            - severity = critical
+          receiver: 'critical-email'
+          repeat_interval: 1h
+
+        - matchers:
+            - severity = warning
+          receiver: 'warning-email'
+          repeat_interval: 6h
+
+    receivers:
+      - name: 'default-email'
+        email_configs:
+          - to: 'meghrajbackup8788@gmail.com'     # ← who receives the alert
+            send_resolved: true
+
+      - name: 'critical-email'
+        email_configs:
+          - to: 'meghrajbackup8788@gmail.com'
+            send_resolved: true
+            headers:
+              Subject: '[CRITICAL][K8s] {{ .GroupLabels.alertname }}'
+
+      - name: 'warning-email'
+        email_configs:
+          - to: 'meghrajbackup8788@gmail.com'
+            send_resolved: true
+            headers:
+              Subject: '[WARNING][K8s] {{ .GroupLabels.alertname }}'
+
+    inhibit_rules:
+      - source_matchers:
+          - severity = critical
+        target_matchers:
+          - severity = warning
+        equal: ['alertname', 'namespace']
+

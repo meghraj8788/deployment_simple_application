@@ -10,6 +10,15 @@ spec:
     - name: kubernetes.rules
       rules:
 
+        - alert: TestImagePullBackOff
+          expr: kube_pod_container_status_waiting_reason{reason=~"ImagePullBackOff|ErrImagePull"} == 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{ $labels.pod }} has an image pull error"
+            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} (namespace {{ $labels.namespace }}) can't pull its image."
+        
         - alert: KubernetesNodeNotReady
           expr: kube_node_status_condition{
                   condition="Ready",
